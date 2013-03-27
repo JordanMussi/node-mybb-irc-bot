@@ -43,6 +43,10 @@ bot.addListener('message#', function (from, to, message) {
   else if (message.toLowerCase() == '!help') {
     bot.say(from, 'If you need my help, send me a PM with "help"');
   }
+  else if (message.toLowerCase().indexOf('!team ') == 0 && numParams(message) >= 1) {
+    var searchName = getParams(message).join(' ');
+    onTeam(bot, to, searchName);
+  }
 });
 
 // Listen to PMs
@@ -227,6 +231,85 @@ var searchGoogle = function(bot, to, term) {
     }
   });
 };
+
+var onTeam = function(bot, to, searchName) {
+    console.log('Find if user: "' + searchName + '" is on the team');
+
+  // Search the member list, hopefully the user will be somewhere within the first 300 results
+  request.post('http://community.mybb.com/memberlist.php', { form: { username: searchName, perpage: 300 } }, function (error, response, body) {
+    if (!error && response.statusCode == 200) {
+      $ = cheerio.load(body);
+    
+      var usernamesFound = [];
+      var found = false;
+    
+      // Look at all the table rows that have 6 columns, and aren't the first 2 (headers)
+      $('tr').each(function(i, e) {
+        var numCells = $(this).children('td').toArray().length;
+        if (numCells != 3 || i < 2) {
+          return;
+        }
+      
+        var userRow = $(this);
+
+        var username = userRow.children('td').eq(1).children('a').eq(0).text()
+        var userColor = userRow.children('td').eq(1).children('a').eq(0).children('font').eq(0).attr('color')
+        usernamesFound.push(username);
+      
+        if (username.toLowerCase() == searchName.toLowerCase()) {
+          // User matched!
+          found = true;
+
+          switch (userColor) {
+            case "green":
+              var usergroup = "Management";
+              break;
+            case "red":
+              var usergroup = "Support";
+              break;
+            default:
+              var userColorMatch = false;
+          }
+
+          if (userColorMatch == false) {
+            var userColor = userRow.children('td').eq(1).children('a').eq(1).children('span').eq(0).attr('style').split(';')[0];
+
+            switch (userColor) {
+              case "#ff8806":
+                var usergroup = "Development";
+                break;
+              case "#AA00AA":
+                var usergroup = "Quality Assurance";
+                break;
+              case "#006868":
+                var usergroup = "Public Relations";
+                break;
+            default:
+              var usergroupMatch = false;
+            }
+          }
+          if (usergroupMatch = false) {
+            bot.say(to, searchName + ' isn\'t on the team.');
+          }
+          else {
+            var profileLink = userRow.children('td').eq(1).children('a').eq(0).attr('href');
+            bot.say(to, username + ' is a part of the ' + usergroup + ' Team. ' + profileLink);
+          }
+        }
+      
+      });
+    
+      if (!found) {
+        if (usernamesFound.length > 0) {
+          bot.say(to, 'I couldn\'t find ' + searchName + ', did you mean ' + usernamesFound[Math.floor(Math.random()*usernamesFound.length)] + '?');
+        }
+        else {
+          bot.say(to, 'I couldn\'t find ' + searchName);
+        }
+      }
+    }
+  });
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
