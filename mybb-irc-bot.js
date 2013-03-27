@@ -47,6 +47,10 @@ bot.addListener('message#', function (from, to, message) {
     var searchName = getParams(message).join(' ');
     onTeam(bot, to, searchName);
   }
+  else if (message.toLowerCase().indexOf('!download ') == 0 && numParams(message) >= 1) {
+    var MyBBVersion = getParams(message).join(' ');
+    downloadMyBB(bot, to, MyBBVersion);
+  }
 });
 
 // Listen to PMs
@@ -104,6 +108,8 @@ var getHelp = function(bot, to) {
   bot.say(to, '!user <username> - displays some info about a user on the MyBB Community Forums');
   bot.say(to, '!docs [# results] <search term> - searches MyBB docs for search term, and returns top result (by default) or up to a maximum of 5 if specified');
   bot.say(to, '!google [# results] <search term> - searches Google for search term, and returns top result (by default) or up to a maximum of 5 if specified');
+  bot.say(to, '!team <username> - displays whether the user is in the MyBB Group and what team they are a member of');
+  bot.say(to, '!download <version> - displays a link to download a version of MyBB (less than 1.6.0 (1600) is not supported)');
   bot.say(to, 'In addition, I respond to the following commands by PM:');
   bot.say(to, 'help - this text you\'re reading');
 }
@@ -311,6 +317,65 @@ var onTeam = function(bot, to, searchName) {
   });
 }
 
+var downloadMyBB = function(bot, to, MyBBVersion) {
+    console.log('Download MyBB Version: ' + MyBBVersion);
+
+    var Download = true;
+
+    if (MyBBVersion < 1600) {
+      var Download = false;
+    }
+
+    if (Download != false) {
+
+      switch (MyBBVersion) {
+        default:
+          var downloadLink = "http://www.mybb.com/download/156";
+        break;
+        case 1608:
+        case 1.6.8:
+          var downloadLink = "http://www.mybb.com/download/155";
+        break;
+        case 1607:
+        case 1.6.7:
+          var downloadLink = "http://www.mybb.com/download/154";
+        break;
+        case 1606:
+        case 1.6.6:
+          var downloadLink = "http://www.mybb.com/download/153";
+        break;
+        case 1605:
+        case 1.6.5:
+          var downloadLink = "http://www.mybb.com/download/152";
+        break;
+        case 1604:
+        case 1.6.4:
+          var downloadLink = "http://www.mybb.com/download/146";
+        break;
+        case 1603:
+        case 1.6.3:
+          var downloadLink = "http://www.mybb.com/download/139";
+        break;
+        case 1602:
+        case 1.6.2:
+          var downloadLink = "http://www.mybb.com/download/133";
+        break;
+        case 1601:
+        case 1.6.1:
+          var downloadLink = "http://www.mybb.com/download/127";
+        break;
+        case 1600:
+        case 1.6.0:
+        case 1.6:
+          var downloadLink = "http://www.mybb.com/download/126";
+        break;
+      }
+      bot.say(to, 'Download MyBB ' + MyBBVersion + ': ' + downloadLink);
+    }
+    else {
+      bot.say(to, 'I do not currently support versions below 1.6.0 (1600). To download a version of MyBB less than 1.6.0 view the list of versions on the MyBB Docs: http://docs.mybb.com/Versions.html');
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Helpers
