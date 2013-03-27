@@ -105,11 +105,19 @@ var getHelp = function(bot, to) {
 }
 
 var searchUser = function(bot, to, searchName) {
-  console.log('Look for user: ' + searchName);
-  
+  // Some username filters
   if (searchName.toLowerCase() == "dennistt") {
+    console.log('Look for user: ' + searchName + ', replaced with Dennis Tsang');
     var searchName = "Dennis Tsang";
+  }  
+  else if (searchName.toLowerCase() == "jm") {
+    var searchName = "JordanMussi";
+    console.log('Look for user: ' + searchName + ', replaced with JordanMussi');
   }
+  else {
+    console.log('Look for user: ' + searchName);
+  }
+
   // Search the member list, hopefully the user will be somewhere within the first 300 results
   request.post('http://community.mybb.com/memberlist.php', { form: { username: searchName, perpage: 300 } }, function (error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -138,7 +146,8 @@ var searchUser = function(bot, to, searchName) {
           var postCount = userRow.children('td').eq(4).text();
           var regDate = userRow.children('td').eq(2).text().split(',')[0];
           var lastVisitDate = userRow.children('td').eq(3).text().split(',')[0];
-          bot.say(to, username + ': ' + postCount + ' posts on the Community Forums, last visited ' + lastVisitDate + ', member since ' + regDate + '. ' + profileLink);
+          var lastVisitTime = userRow.children('td').eq(3).text().split(',')[1];
+          bot.say(to, username + ': ' + postCount + ' posts on the Community Forums, last visited ' + lastVisitDate + ' at ' + lastVisitTime + ', member since ' + regDate + '. ' + profileLink);
         }
       
       });
