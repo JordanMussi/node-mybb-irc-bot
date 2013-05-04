@@ -81,6 +81,15 @@ bot.addListener('pm', function (from, message) {
   if (message.toLowerCase() == 'help') {
     getHelp(bot, from);
   }
+  else if (message.toLowerCase() == 'ophelp') {
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      getOPHelp(bot, from);
+    }
+    else {
+      util.log(from + " tried to use an operator command - ophelp");
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
   else if (message.toLowerCase() == 'about') {
     bot.say(from, 'I\'m written in Node.js and my author is DennisTT.  My source can be found at https://github.com/DennisTT/node-mybb-irc-bot');
     bot.say(from, 'Feel free to develop me, but please submit a pull request after.');
@@ -88,6 +97,92 @@ bot.addListener('pm', function (from, message) {
   else if (message.toLowerCase() == 'hello') {
     bot.say(from, 'Hello to you too!');
   }
+  // start: operator commands
+  else if (message.toLowerCase().indexOf('!msg ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var channel = input.split(' ')[0];
+    var message = input.split(' ').slice(1).join(' ');
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.say(channel, message);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !msg " + channel + " " + message);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!action ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var channel = input.split(' ')[0];
+    var message = input.split(' ').slice(1).join(' ');
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.action(channel, message);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !action " + channel + " " + message);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!notice ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var user = input.split(' ')[0];
+    var message = input.split(' ').slice(1).join(' ');
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.notice(user, message);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !notice " + user + " " + message);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!join ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var channel = input.split(' ')[0];
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.join(channel);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !join " + channel);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!part ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var channel = input.split(' ')[0];
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.part(channel);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !part " + channel + " " + message);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!quit ') == 0 && numParams(message) >= 1) {
+    var input = getParams(message).join(' ');
+    var message = input.split(' ')[0];
+
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.disconnect(message);
+    }
+    else {
+      util.log(from + " tried to use an operator command - !quit " + message);
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  else if (message.toLowerCase().indexOf('!quit') == 0 && from.toLowerCase().indexOf(config.operators)) {
+    if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.disconnect("Leaving");
+    }
+    else {
+      util.log(from + " tried to use an operator command - !quit");
+      bot.say(from, "Permission Denied: You are not an operator of this bot.")
+    }
+  }
+  // end: operator commands
   else {
     bot.say(from, 'Sorry, I don\'t understand what you want.  Say "help" if you need help.');
   }
@@ -141,6 +236,18 @@ var getHelp = function(bot, to) {
   bot.say(to, 'In addition, I respond to the following commands by PM:');
   bot.say(to, 'help - this text you\'re reading');
   bot.say(to, 'about - about me');
+  if (config.operators.indexOf(from.toLowerCase()) >= 0) {
+      bot.say(to, 'ophelp - help for bot operators');
+    }
+}
+
+var getOPHelp = function(bot, to) {
+  bot.say(to, 'I respond to the following operator commands by PM:');
+  bot.say(to, '!msg <channel/user> <message> - Send a message to a channel');
+  bot.say(to, '!action <channel> <message> - Send a action to a channel (e.g. /me does something)');
+  bot.say(to, '!join <channel> - Join a channel');
+  bot.say(to, '!part <channel> <message> - Part a channel. Message not required');
+  bot.say(to, '!quit <message> - Disconnet from IRC');
 }
 
 var searchUser = function(bot, to, searchName) {
