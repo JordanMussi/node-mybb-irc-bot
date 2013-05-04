@@ -4,8 +4,14 @@ var config = {
   channels: ['#mybb'],
   botName: 'MyBBot',
   nickservPassword: '',
-  floodProtectionDelay: 1000
+  floodProtectionDelay: 1000,
+  operators: 'dennistt'
 };
+
+/* Operators example:
+ * operators: 'dennistt,user,myop'
+ * Notice that they are lower case and how they are sparated
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Actual bot stuff
