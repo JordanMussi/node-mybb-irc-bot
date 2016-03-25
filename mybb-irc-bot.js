@@ -14,6 +14,10 @@ var options = {
     twitter: 'https://twitter.com/MyBB',
     github: 'https://github.com/mybb',
     docs: 'http://docs.mybb.com',
+    download: 'https://www.mybb.com/download/',
+    downloadMerge: 'https://www.mybb.com/download/merge-system/',
+    mods: 'http://community.mybb.com/mods.php',
+    modsView: 'http://community.mybb.com/mods.php?action=view&pid=%d',
     forums: 'http://community.mybb.com',
     forumsName: 'MyBB Community Forums'
   }
@@ -86,6 +90,19 @@ bot.addListener('message#', function (from, to, message) {
   else if (message.toLowerCase() == '!facebook' && isEnabled(to, 'facebook')) {
     bot.say(to, getOption(to, 'friendlyName') + ' Facebook: ' + getOption(to, 'facebook'));
   }
+  else if (message.toLowerCase() == '!download' && isEnabled(to, 'download')) {
+    bot.say(to, 'You can download ' + getOption(to, 'friendlyName') + ' at: ' + getOption(to, 'download'));
+  }
+  else if (message.toLowerCase() == '!download merge' && isEnabled(to, 'downloadMerge')) {
+    bot.say(to, 'You can download the ' + getOption(to, 'friendlyName') + ' Merge System at: ' + getOption(to, 'downloadMerge'));
+  }
+  else if (message.toLowerCase() == '!mods') {
+    bot.say(to, 'You can find ' + getOption(to, 'friendlyName') + ' Mods at: ' + getOption(to, 'mods'));
+  }
+  else if (message.toLowerCase().indexOf('!mods') == 0 && numParams(message) == 1 && isEnabled(to, 'modsView')) {
+    var params = getParams(message);
+    mods(bot, to, params);
+  }
   else if (message.toLowerCase() == '!help') {
     bot.say(from, 'If you need my help, send me a PM with "help"');
   }
@@ -153,6 +170,8 @@ var getHelp = function(bot, to) {
   bot.say(to, '!facebook - links to the channel\'s Facebook page');
   bot.say(to, '!twitter - links to the channel\'s Twitter account');
   bot.say(to, '!github <repository> <pull|issue> <id> - searches the channel\'s organization for a repository, pull request or issue');
+  bot.say(to, '!download [merge] - links to the channel\'s download page');
+  bot.say(to, '!mods - links to the channel\'s modifications site');
   bot.say(to, 'In addition, I respond to the following commands by PM:');
   bot.say(to, 'help - this text you\'re reading');
   bot.say(to, 'about - about me');
@@ -365,6 +384,26 @@ var github = function(bot, to, params) {
   }
   else {
     bot.say(to, errorMessage);
+  }
+};
+
+var mods = function(bot, to, params) {
+  if(isNumber(params[0])) {
+    request.get(util.format(getOption(to, 'modsView'), params[0]), function (error, response, body) {
+      if (!error && response.statusCode == 200) {
+        $ = cheerio.load(body);
+        var title = $('title').text();
+        if(title.indexOf('MyBB Mods - ') == 0) {
+          title = title.split('MyBB Mods - ')[1];
+          bot.say(to, getOption(to, 'friendlyName') + ' Mods: ' + title + ': ' + util.format(getOption(to, 'modsView'), params[0]));
+        } else {
+          bot.say(to, getOption(to, 'friendlyName') + ' Mods: ' + util.format(getOption(to, 'modsView'), params[0]));
+        }
+      } else {
+        bot.say(to, getOption(to, 'friendlyName') + ' Mods: ' + util.format(getOption(to, 'modsView'), params[0]));
+      }
+    });
+
   }
 };
 
