@@ -189,10 +189,11 @@ var searchUser = function(bot, to, searchName) {
       var usernamesFound = [];
       var found = false;
 
-      // Look at all the table rows that have 6 columns, and aren't the first 2 (headers)
+      // Look at the list of users we have been given
       $('tr').each(function(i, e) {
         var numCells = $(this).children('td').toArray().length;
-        if (numCells != 6 || i < 2) {
+        // Only look at rows that have 7 columns and aren't the first 2 (headers)
+        if (numCells != 7 || i < 2) {
           return;
         }
 
